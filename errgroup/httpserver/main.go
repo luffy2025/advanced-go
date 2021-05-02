@@ -10,8 +10,10 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
+// 同时启动 2 个 http server，并在 5 秒后关闭
 func main() {
 	healthServer := newServer(withAddr("localhost:8081"),
 		withHandle("/health", func(writer http.ResponseWriter, request *http.Request) {
@@ -31,14 +33,22 @@ func main() {
 			}
 		}))
 
-	err := run(healthServer, mainServer)
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		select {
+		case <- time.After(5 * time.Second):
+			cancel()
+		}
+	}()
+
+	err := run(ctx, healthServer, mainServer)
 	if err != nil {
 		log.Fatalf("%+v", err)
 	}
 }
 
-func run(servers ...*server) error {
-	g, ctx := errgroup.WithContext(context.Background())
+func run(ctx context.Context, servers ...*server) error {
+	g, ctx := errgroup.WithContext(ctx)
 
 	for _, svr := range servers {
 		svr := svr

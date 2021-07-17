@@ -1,4 +1,4 @@
-module github.com/shushu2012/smartbrick/advanced-go
+module github.com/shushu2012/advanced-go
 
 go 1.15
 

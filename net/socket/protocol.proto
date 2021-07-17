@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package client;
+
+option go_package = "net/socket";
+
+// TCP 包结构定义
+// 完整的消息格式：4(len, littleEndian) + byte[](Marshal(Proto))。客户端和服务器同时按此格式发送消息。
+message Proto {
+	int32 ver = 1; // 版本
+	int32 index = 2; // 消息序号，递增
+	int32 mod = 3; // 模块ID，全局唯一
+	int32 seq = 4; // 模块内消息ID，模块内唯一
+	bool zip = 5; // body是否已压缩
+
+	bytes body = 7; // 消息体的proto的bytes数组
+}
+
+
